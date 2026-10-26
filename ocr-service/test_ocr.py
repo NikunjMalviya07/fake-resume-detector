@@ -12,5 +12,5 @@ def extract_text_from_pdf(pdf_path):
     return full_text
 
 if __name__ == "__main__":
-    result = extract_text_from_pdf("sample_resume.pdf")
+    result = extract_text_from_pdf("Modern Creative Resume.pdf")
     print(result)

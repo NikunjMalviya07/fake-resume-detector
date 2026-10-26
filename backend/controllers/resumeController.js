@@ -1,6 +1,7 @@
 import Resume from '../model/Resume.js';
 import { extractTextFromResume } from '../services/ocrService.js';
 import { extractResumeData } from '../services/extractService.js';
+import { verifyEducation } from '../services/educationService.js';
 
 export async function uploadResume(req, res) {
   if (!req.file) {
@@ -9,11 +10,17 @@ export async function uploadResume(req, res) {
 
   const rawText = await extractTextFromResume(req.file.buffer, req.file.originalname);
   const structuredData = await extractResumeData(rawText);
+  const educationResult = await verifyEducation(structuredData);
 
   const resume = await Resume.create({
     filename: req.file.originalname,
     rawText,
-    structuredData
+    structuredData,
+    verification: {
+      education: educationResult,
+      github: null,
+      email: null
+    }
   });
 
   res.status(201).json(resume);
