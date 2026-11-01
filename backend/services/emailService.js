@@ -8,11 +8,11 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-export async function sendExperienceVerificationEmail({ to, candidateName, company, role, duration, confirmUrl, denyUrl }) {
+export async function sendExperienceVerificationEmail({ to, candidateName, company, role, duration, confirmUrl, denyUrl, hrName, hrEmail }) {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto;">
       <h2>Work Experience Verification Request</h2>
-      <p>This is an automated request from the <strong>Fake Resume Detector</strong> system to verify a candidate's work experience claim.</p>
+      <p>This is an automated request from <strong>${hrName}</strong>, via the <strong>Fake Resume Detector</strong> system, to verify a candidate's work experience claim.</p>
       <table style="border-collapse: collapse; margin: 16px 0;">
         <tr><td style="padding:4px 8px;"><strong>Candidate</strong></td><td style="padding:4px 8px;">${candidateName}</td></tr>
         <tr><td style="padding:4px 8px;"><strong>Company</strong></td><td style="padding:4px 8px;">${company}</td></tr>
@@ -24,12 +24,13 @@ export async function sendExperienceVerificationEmail({ to, candidateName, compa
         <a href="${confirmUrl}" style="background:#16a34a;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;margin-right:12px;">Yes, Verified</a>
         <a href="${denyUrl}" style="background:#dc2626;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;">Not Verified</a>
       </div>
-      <p style="color:#6b7280;font-size:12px;">This is a one-time verification link generated for a college mini-project demo.</p>
+      <p style="color:#6b7280;font-size:12px;">Questions? Reply directly to this email to reach ${hrName}.</p>
     </div>
   `;
 
   await transporter.sendMail({
-    from: `"Fake Resume Detector" <${process.env.EMAIL_USER}>`,
+    from: `"${hrName} (via Fake Resume Detector)" <${process.env.EMAIL_USER}>`,
+    replyTo: hrEmail,
     to,
     subject: `Work Experience Verification Request — ${candidateName}`,
     html

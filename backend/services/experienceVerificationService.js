@@ -20,9 +20,6 @@ async function matchCompany(companyNameFromResume) {
   return null;
 }
 
-// Builds pending verification entries (no email sent yet, no DB writes yet)
-// for each work-experience item on the resume. Call this BEFORE creating the
-// Resume document, so the tokens get saved as part of the initial document.
 export async function buildExperienceEntries(experienceList = []) {
   const entries = [];
 
@@ -54,10 +51,9 @@ export async function buildExperienceEntries(experienceList = []) {
   return entries;
 }
 
-// Sends the actual verification emails for every 'pending' entry. Call this
-// AFTER the Resume document is saved — lookups later only need the token,
-// not the resumeId, so this can safely run in the background.
-export async function sendExperienceVerificationEmails(candidateName, experienceEntries) {
+// hr = { hrName, hrEmail } — the logged-in HR, used to personalize the sender
+// display name and Reply-To on each outgoing email (added for the auth pivot).
+export async function sendExperienceVerificationEmails(candidateName, experienceEntries, hr) {
   const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
 
   for (const entry of experienceEntries) {
@@ -74,7 +70,9 @@ export async function sendExperienceVerificationEmails(candidateName, experience
         role: entry.role,
         duration: entry.duration,
         confirmUrl,
-        denyUrl
+        denyUrl,
+        hrName: hr.hrName,
+        hrEmail: hr.hrEmail
       });
     } catch (error) {
       console.error(`Failed to send verification email for ${entry.matchedCompanyName}:`, error.message);

@@ -1,0 +1,71 @@
+{
+  "72cfc539dce4909aa2137ff4d5d6b8c0fe18d96a162a777be3f4701d8c32f03c": {
+    "name": "NIKUNJ MALVIYA",
+    "email": "officialmalviya14@gmail.com",
+    "phone": "+91 8962155892",
+    "college": "OIST Bhopal",
+    "degree": "B.Tech in Computer Science & Engineering",
+    "cgpa": "8.52/10",
+    "passingYear": "2029",
+    "tenthPassingYear": "2023",
+    "twelfthPassingYear": "2025",
+    "skills": [
+      "C++",
+      "JavaScript",
+      "HTML",
+      "CSS",
+      "Node.js",
+      "Express.js",
+      "React.js",
+      "MongoDB",
+      "DSA",
+      "OOP",
+      "DBMS",
+      "Operating Systems",
+      "Computer Networks",
+      "Git",
+      "GitHub",
+      "Postman",
+      "Figma"
+    ],
+    "projects": [
+      {
+        "title": "Nirikshak — Scan. Verify. Enforce",
+        "description": "AI-powered inspection app for Legal Metrology officers: photograph a packaged product and it reads the label, checks mandatory details like MRP, net quantity and dates, and flags compliance instantly.",
+        "githubUrl": null,
+        "techStack": []
+      },
+      {
+        "title": "MediSafe — Smart Medicine Safety & Drug Interaction Assistant",
+        "description": "AI-powered healthcare platform designed to prevent medication errors and maximize patient safety.",
+        "githubUrl": null,
+        "techStack": []
+      },
+      {
+        "title": "Fake Resume Detector",
+        "description": "Building a full-stack tool that extracts resume data using OCR and verifies education, email and GitHub claims to flag inconsistent or fraudulent resumes.",
+        "githubUrl": null,
+        "techStack": [
+          "React",
+          "Node.js",
+          "FastAPI",
+          "MongoDB"
+        ]
+      }
+    ],
+    "experience": [
+      {
+        "company": "TCS",
+        "role": "Software Development Intern",
+        "duration": "Jun 2025 - Aug 2025"
+      },
+      {
+        "company": "Infosys",
+        "role": "Backend Development Intern",
+        "duration": "Dec 2024 - Jan 2025"
+      }
+    ],
+    "githubUsername": "NikunjMalviya07",
+    "linkedinUrl": "linkedin.com/in/nikunj-malviya/"
+  }
+}
