@@ -1,6 +1,8 @@
 from fastapi import FastAPI, UploadFile, File
 import pytesseract
 from pdf2image import convert_from_bytes
+import pdfplumber
+import io
 
 app = FastAPI()
 

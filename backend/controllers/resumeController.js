@@ -1,7 +1,10 @@
 import Resume from '../model/Resume.js';
 import { extractTextFromResume } from '../services/ocrService.js';
 import { extractResumeData } from '../services/extractService.js';
-import { verifyEducation } from '../services/educationService.js';
+import { verifyEducation, verifyStudentRecord } from '../services/educationService.js';
+import { verifyGithub } from '../services/githubService.js';
+import { calculateScore } from '../services/scoringService.js';
+import { buildExperienceEntries, sendExperienceVerificationEmails } from '../services/experienceVerificationService.js';
 
 export async function uploadResume(req, res) {
   if (!req.file) {
@@ -10,18 +13,34 @@ export async function uploadResume(req, res) {
 
   const rawText = await extractTextFromResume(req.file.buffer, req.file.originalname);
   const structuredData = await extractResumeData(rawText);
-  const educationResult = await verifyEducation(structuredData);
+
+  const educationCheck = await verifyEducation(structuredData);
+  const studentRecordCheck = await verifyStudentRecord(structuredData);
+  const githubResult = await verifyGithub(structuredData);
+  const experienceEntries = await buildExperienceEntries(structuredData.experience);
+
+  const verification = {
+    education: educationCheck,
+    studentRecord: studentRecordCheck,
+    github: githubResult,
+    experience: experienceEntries
+  };
+
+  const score = calculateScore(verification);
 
   const resume = await Resume.create({
     filename: req.file.originalname,
     rawText,
     structuredData,
-    verification: {
-      education: educationResult,
-      github: null,
-      email: null
-    }
+    verification,
+    score
   });
+
+  // Fire-and-forget: emails go out in the background so the response returns
+  // immediately with education/GitHub results while experience stays "pending".
+  sendExperienceVerificationEmails(structuredData.name, experienceEntries).catch(err =>
+    console.error('Error sending experience verification emails:', err.message)
+  );
 
   res.status(201).json(resume);
 }

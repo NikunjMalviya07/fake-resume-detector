@@ -9,7 +9,10 @@ const resumeSchema = new mongoose.Schema({
     phone: String,
     college: String,
     degree: String,
+    cgpa: String,
     passingYear: String,
+    tenthPassingYear: Number,
+    twelfthPassingYear: Number,
     skills: [String],
     projects: [{
       title: String,
@@ -27,8 +30,10 @@ const resumeSchema = new mongoose.Schema({
   },
   verification: {
     education: { type: Object, default: null },
+    studentRecord: { type: Object, default: null },
     github: { type: Object, default: null },
-    email: { type: Object, default: null }
+    email: { type: Object, default: null },
+    experience: { type: [Object], default: [] }
   },
   score: { type: Object, default: null },
   createdAt: { type: Date, default: Date.now }
