@@ -132,17 +132,26 @@ async function checkContribution(owner, repo, username) {
   };
 }
 
+// Checks whether the candidate genuinely authored content in a repo. A repo
+// they truly own (and isn't a fork) is trusted directly. Anything else — a
+// fork, or a repo they merely have collaborator access to but don't own —
+// requires real commit evidence rather than being assumed.
 async function verifyRepoContribution(repo, username) {
+  const isOwner = repo.owner?.login?.toLowerCase() === username.toLowerCase();
   const isFork = Boolean(repo.fork && repo.parent);
 
-  if (!isFork) {
-    return { isFork: false, status: 'pass', confidence: 'high', note: 'Original (non-forked) repository owned by candidate' };
+  if (isOwner && !isFork) {
+    return { isFork: false, status: 'pass', confidence: 'high', note: 'Original repository owned by candidate' };
   }
 
-  const contribution = await checkContribution(repo.parent.owner.login, repo.parent.name, username);
+  const targetOwner = isFork ? repo.parent.owner.login : repo.owner.login;
+  const targetRepo = isFork ? repo.parent.name : repo.name;
+
+  const contribution = await checkContribution(targetOwner, targetRepo, username);
   return {
-    isFork: true,
-    originalRepository: repo.parent.full_name,
+    isFork,
+    isOwner,
+    ...(isFork ? { originalRepository: repo.parent.full_name } : { actualOwner: repo.owner.login }),
     status: contribution.status,
     confidence: contribution.confidence,
     note: contribution.note,
@@ -157,6 +166,13 @@ function normalizeText(value = '') {
 }
 
 const STOPWORDS = new Set(['the', 'and', 'for', 'with', 'using', 'app', 'application', 'system', 'project', 'assistant', 'platform', 'web', 'based', 'live', 'an', 'a', 'to', 'of', 'is', 'in']);
+
+const KNOWN_LANGUAGES = new Set([
+  'c', 'c++', 'c#', 'java', 'python', 'javascript', 'typescript', 'html', 'css',
+  'php', 'ruby', 'go', 'rust', 'swift', 'kotlin', 'dart', 'sql', 'r', 'scala',
+  'perl', 'objective-c', 'matlab', 'shell', 'bash', 'powershell', 'lua',
+  'haskell', 'elixir', 'clojure', 'assembly'
+]);
 
 function getWords(value = '') {
   return normalizeText(value).split(' ').filter(w => w.length > 2 && !STOPWORDS.has(w));
@@ -189,8 +205,22 @@ function scoreRepoMatch(project, repo) {
   }
 
   const normTitle = normalizeText(title);
-  if (normTitle && repoName === normTitle) { score += 50; reasons.push('Repository name exactly matches project title'); }
-  else if (normTitle && repoName.length > 3 && (repoName.includes(normTitle) || normTitle.includes(repoName))) { score += 30; reasons.push('Repository name closely matches project title'); }
+  const titleWordSet = new Set(normTitle.split(' ').filter(Boolean));
+  const repoNameWords = repoName.split(' ').filter(w => w.length > 2);
+
+  if (normTitle && repoName === normTitle) {
+    score += 50;
+    reasons.push('Repository name exactly matches project title');
+  } else if (repoNameWords.length === 1 && titleWordSet.has(repoNameWords[0])) {
+    score += 50;
+    reasons.push('Repository name exactly matches a key word in the project title (likely the project codename)');
+  } else if (repoNameWords.length > 1 && repoNameWords.every(w => titleWordSet.has(w))) {
+    score += 40;
+    reasons.push('All words in the repository name appear in the project title (possibly reordered or with other words between them)');
+  } else if (normTitle && repoName.length > 3 && (repoName.includes(normTitle) || normTitle.includes(repoName))) {
+    score += 20;
+    reasons.push('Repository name is a partial substring match with project title');
+  }
 
   const titleWords = getWords(title);
   const repoTokens = new Set(`${repoName} ${repoDesc}`.split(' '));
@@ -213,7 +243,7 @@ function findBestRepoMatch(project, repos) {
     const { score, reasons } = scoreRepoMatch(project, repo);
     if (!best || score > best.score) best = { repo, score, reasons };
   }
-  if (!best || best.score < 25) return null;
+  if (!best || best.score < 50) return null;
   return { repo: best.repo, confidence: best.score / 100, reasons: best.reasons };
 }
 
@@ -242,6 +272,14 @@ async function verifyProject(project, username, repos) {
   }
 
   const contribution = await verifyRepoContribution(best.repo, username);
+
+  // Auto-matched (not explicitly linked by the candidate) + below-high confidence
+  // should never auto-"pass" — a weak guess shouldn't carry the same weight as
+  // a repo the candidate directly claimed.
+  const cappedStatus = best.confidence < 0.7 && contribution.status === 'pass'
+    ? 'uncertain'
+    : contribution.status;
+
   return {
     projectTitle: project.title,
     repositoryFound: true,
@@ -249,7 +287,11 @@ async function verifyProject(project, username, repos) {
     repository: best.repo.full_name,
     matchConfidence: best.confidence,
     matchReasons: best.reasons,
-    ...contribution
+    ...contribution,
+    status: cappedStatus,
+    note: best.confidence < 0.7
+      ? `${contribution.note} (Note: this repository was auto-matched by title similarity, not explicitly linked on the resume — match confidence ${Math.round(best.confidence * 100)}%, treated as unverified rather than confirmed.)`
+      : contribution.note
   };
 }
 
@@ -275,9 +317,15 @@ export async function verifyGithub(structuredData) {
       } catch { continue; }
     }
     const languages = [...languageSet];
+
     const normalizedSkills = skills.map(s => s.toLowerCase());
-    const matchedSkills = normalizedSkills.filter(s => languages.some(l => l.includes(s) || s.includes(l)));
-    const skillMatchRatio = normalizedSkills.length > 0 ? matchedSkills.length / normalizedSkills.length : null;
+    // Only compare skills that are actual programming/markup languages — GitHub's
+    // language stats can never detect tools, concepts, or databases (Git, REST APIs,
+    // OOP, MySQL, etc.), so including them in the denominator unfairly drags the
+    // ratio down for skills that were never measurable this way to begin with.
+    const languageSkills = normalizedSkills.filter(s => KNOWN_LANGUAGES.has(s));
+    const matchedSkills = languageSkills.filter(s => languages.some(l => l === s || l.includes(s) || s.includes(l)));
+    const skillMatchRatio = languageSkills.length > 0 ? matchedSkills.length / languageSkills.length : null;
 
     const projectChecks = [];
     for (const project of structuredData.projects || []) {

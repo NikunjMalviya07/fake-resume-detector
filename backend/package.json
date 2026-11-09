@@ -8,7 +8,8 @@
     "dev": "npx nodemon server.js",
     "seed": "node data/seedInstitutions.js",
     "seed:students": "node data/seedStudents.js",
-    "seed:companies": "node data/seedCompanies.js"
+    "seed:companies": "node data/seedCompanies.js",
+    "test:github": "node scripts/testGithub.js"
   },
   "keywords": [],
   "author": "",

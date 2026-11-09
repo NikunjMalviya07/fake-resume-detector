@@ -67,5 +67,44 @@
     ],
     "githubUsername": "NikunjMalviya07",
     "linkedinUrl": "linkedin.com/in/nikunj-malviya/"
+  },
+  "17ddf4fa2db8a0e952fedcc2870a4a02dfb375a36823f336f2d926349f99786f": {
+    "name": "NANDANI",
+    "email": "nandanikumari63703@gmail.com",
+    "phone": null,
+    "college": "Lakshmi Narain College of Technology (LNCT), Bhopal",
+    "degree": "B.Tech in Computer Science and Engineering",
+    "cgpa": null,
+    "passingYear": null,
+    "tenthPassingYear": "2022",
+    "twelfthPassingYear": "2024",
+    "skills": [
+      "C++",
+      "HTML",
+      "CSS",
+      "Artificial Intelligence",
+      "Machine Learning",
+      "Frontend Development"
+    ],
+    "projects": [
+      {
+        "title": "CAPIS: Climate-Aware Precision Irrigation System",
+        "description": "Built the project's frontend pages in HTML and CSS, using an Al assistant for help. Prepared part of the team presentation. Project idea: using soil moisture, weather data and crop water needs to decide when to irrigate.",
+        "githubUrl": null,
+        "techStack": [
+          "HTML",
+          "CSS"
+        ]
+      },
+      {
+        "title": "MAGI: Hybrid Quantum-Classical Model for Early Disease Detection",
+        "description": "Project idea: a hybrid quantum-classical model for early detection of diseases.",
+        "githubUrl": null,
+        "techStack": []
+      }
+    ],
+    "experience": [],
+    "githubUsername": "nandani63703",
+    "linkedinUrl": "linkedin.com/in/nandani-sharma/"
   }
 }

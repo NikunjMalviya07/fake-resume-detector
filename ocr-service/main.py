@@ -16,3 +16,7 @@ async def extract_text(file: UploadFile = File(...)):
     for page in pages:
         full_text += pytesseract.image_to_string(page) + "\n"
     return {"filename": file.filename, "extracted_text": full_text}
+
+    # cd ocr-service
+    # venv\Scripts\activate
+    # uvicorn main:app --host 127.0.0.1 --port 8001 --reload  
