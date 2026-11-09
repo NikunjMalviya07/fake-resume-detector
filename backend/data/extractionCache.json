@@ -106,5 +106,217 @@
     "experience": [],
     "githubUsername": "nandani63703",
     "linkedinUrl": "linkedin.com/in/nandani-sharma/"
+  },
+  "463326a01db8aed2421c3bb06e7c9c2576956fd5c0b68a5ac1d2f20cc0d1e116": {
+    "name": "MADHAV RAJ",
+    "email": "madhavr432@gmail.com",
+    "phone": "9264402334",
+    "college": "Lakshmi Narain College of Technology (LNCT), Bhopal",
+    "degree": "B.Tech, Computer Science and Engineering",
+    "cgpa": "7.9",
+    "passingYear": "2029",
+    "tenthPassingYear": null,
+    "twelfthPassingYear": null,
+    "skills": [
+      "Python",
+      "C++",
+      "C",
+      "SQL",
+      "HTML",
+      "NumPy",
+      "pandas",
+      "FastAPI",
+      "PostgreSQL",
+      "Git",
+      "GitHub",
+      "JavaScript"
+    ],
+    "projects": [
+      {
+        "title": "Smart Presence — Attendance Management System",
+        "description": "Designed around QR-based attendance sessions, registered-device verification, native biometric authentication, and BLE proximity checks, with backend validation to help prevent proxy attendance.",
+        "githubUrl": null,
+        "techStack": []
+      },
+      {
+        "title": "FastAPI Patient Management",
+        "description": "Built a Python REST API using FastAPI and Pydantic to model patient records, including patient ID, name, city, age, gender, height, and weight, with a computed BMI value.",
+        "githubUrl": null,
+        "techStack": [
+          "Python",
+          "FastAPI",
+          "Pydantic"
+        ]
+      },
+      {
+        "title": "Jarvis — Voice Assistant",
+        "description": "Developed a Python voice assistant with speech recognition and text-to-speech. Features include web/YouTube searches, opening websites, Wikipedia summaries, screenshots, YouTube controls, and Hindi translation.",
+        "githubUrl": null,
+        "techStack": [
+          "Python"
+        ]
+      },
+      {
+        "title": "CivicSync — Civic Challenge Platform (Hackathon)",
+        "description": "Contributed to backend design for a platform concept that uses Al-assisted civic complaint categorization and prioritization, and matches challenges with relevant expertise.",
+        "githubUrl": null,
+        "techStack": []
+      }
+    ],
+    "experience": [],
+    "githubUsername": "madhavr432",
+    "linkedinUrl": "linkedin.com/in/madhav-raj-514123364"
+  },
+  "3acdc6e6bcf46067816712f2d8ed94ca9d71e68d4c26cba141adde2482be89de": {
+    "name": "PARTH NAYAK",
+    "email": "parthnayak207@gmail.com",
+    "phone": "+91 9424095835",
+    "college": "Lakshmi Narain College of Technology (LNCT), Bhopal",
+    "degree": "B.Tech, Computer Science & Engineering",
+    "cgpa": "7.95",
+    "passingYear": "2029",
+    "tenthPassingYear": null,
+    "twelfthPassingYear": null,
+    "skills": [
+      "C",
+      "C++",
+      "Java",
+      "Python",
+      "Neovim",
+      "Visual Studio Code",
+      "OpenCode",
+      "Claude Code",
+      "Google Antigravity",
+      "Arch Linux",
+      "Ubuntu",
+      "Fedora",
+      "Mint",
+      "Manjaro",
+      "Kali",
+      "BlackArch",
+      "EndeavourOS",
+      "Garuda",
+      "Flask",
+      "FastAPI",
+      "Spring-Boot",
+      "SQLite",
+      "PostgreSQL",
+      "Linux server administration",
+      "Docker",
+      "Docker Compose",
+      "Self-hosted services",
+      "Computer networking",
+      "Bootloader unlocking",
+      "TWRP",
+      "Custom ROM/kernel flashing",
+      "Benchmarking",
+      "Circuit simulation",
+      "Hybrid quantum-classical ML"
+    ],
+    "projects": [
+      {
+        "title": "CAPIS — Crop & Agricultural Pump Intelligence System",
+        "description": "Developed backend components using Python, Flask, and SQLite as part of a collaborative team. Won first place in the Agriculture category at BGI Hackathon 2025.",
+        "githubUrl": null,
+        "techStack": [
+          "Python",
+          "Flask",
+          "SQLite"
+        ]
+      },
+      {
+        "title": "Hybrid Quantum Machine Learning for Disease Detection",
+        "description": "Built the classical ML and data preprocessing stages of a hybrid quantum-classical pipeline. Explored benchmarking of XGBoost against a simulated Variational Quantum Classifier (VQC). Introductory exposure; not clinically validated or deployed.",
+        "githubUrl": null,
+        "techStack": [
+          "Python",
+          "Scikit-learn",
+          "XGBoost",
+          "PennyLane"
+        ]
+      },
+      {
+        "title": "Self-Hosted Cloud and Web Infrastructure",
+        "description": "Deployed Nextcloud and supporting services on Ubuntu Server using Docker Compose. Gained practical Linux server administration experience by running and maintaining self-hosted services.",
+        "githubUrl": null,
+        "techStack": [
+          "Ubuntu Server",
+          "Docker",
+          "Docker Compose",
+          "Nextcloud"
+        ]
+      }
+    ],
+    "experience": [],
+    "githubUsername": "R4ZEROMAN",
+    "linkedinUrl": "https://www.linkedin.com/in/parth-nayak-39ba7136a/"
+  },
+  "3a90f07d82ca77b1139b2ffd5fae757abf5697dad4ae81abae6b1d0e27bf2e6c": {
+    "name": "Prabhat Kushwaha",
+    "email": "prabhatwdn2005@gmail.com",
+    "phone": "+91 6264934785",
+    "college": "Lakshmi Narayan College of Technology (LNCT), Bhopal",
+    "degree": "B.Tech in Computer Science and Engineering",
+    "cgpa": "8.24",
+    "passingYear": "2029",
+    "tenthPassingYear": "2021",
+    "twelfthPassingYear": "2023",
+    "skills": [
+      "C++",
+      "Python",
+      "JavaScript",
+      "HTML",
+      "CSS",
+      "React",
+      "Tailwind CSS",
+      "Node.js",
+      "Express.js",
+      "FastAPI",
+      "REST APIs",
+      "MongoDB",
+      "Mongoose",
+      "SQLite",
+      "Git",
+      "GitHub",
+      "VS Code",
+      "Data Structures and Algorithms",
+      "Object-Oriented Programming",
+      "Time and Space Complexity",
+      "Problem Solving",
+      "Teamwork",
+      "Collaboration",
+      "Adaptability",
+      "Willingness to learn"
+    ],
+    "projects": [
+      {
+        "title": "Bhoomi Veda — AI-Powered Smart Farming Platform",
+        "description": "Developed farmer-facing frontend pages (dashboard, AI crop advisor, government schemes, community, profile) using JavaScript and Tailwind CSS. Coordinated Gemini API integration to provide Al-supported crop recommendations in the crop advisor. Contributed to location-based weather insights using browser geolocation, OpenStreetMap Nominatim and Open-Meteo, avoiding paid map and weather APIs; added Hindi-language interface support with Noto Sans Devanagari typography.",
+        "githubUrl": null,
+        "techStack": [
+          "JavaScript",
+          "Tailwind CSS",
+          "Gemini API",
+          "Open-Meteo API",
+          "OpenStreetMap Nominatim"
+        ]
+      },
+      {
+        "title": "MAGI — Hybrid Quantum-Classical Platform for Early Disease Detection",
+        "description": "Built the data-processing pipeline for the Wisconsin Breast Cancer dataset using Pandas and scikit-learn (VarianceThreshold, StandardScaler, PCA, MinMaxScaler). Managed SQLite storage and retrieval of model results and run history through the FastAPI backend. Contributed React and Tailwind CSS frontend components for viewing results and history.",
+        "githubUrl": null,
+        "techStack": [
+          "Python",
+          "React",
+          "FastAPI",
+          "SQLite",
+          "scikit-learn",
+          "Pandas"
+        ]
+      }
+    ],
+    "experience": [],
+    "githubUsername": "prabhat-Git01",
+    "linkedinUrl": "https://linkedin.com/in/prabhat-kushwaha-0a577037a"
   }
 }

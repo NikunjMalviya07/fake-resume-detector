@@ -86,10 +86,6 @@ async function getContributorInfo(owner, repo, username) {
   }
 }
 
-// Combines both signals: direct commit authorship is the strongest evidence
-// (90-100% confidence — the candidate's own commits exist in this exact repo).
-// Contributor-list membership is kept as a secondary, weaker signal, since
-// that endpoint can be cached/delayed or miss squashed commits.
 async function checkContribution(owner, repo, username) {
   let commitCount = 0;
   let commitError = null;
@@ -132,10 +128,6 @@ async function checkContribution(owner, repo, username) {
   };
 }
 
-// Checks whether the candidate genuinely authored content in a repo. A repo
-// they truly own (and isn't a fork) is trusted directly. Anything else — a
-// fork, or a repo they merely have collaborator access to but don't own —
-// requires real commit evidence rather than being assumed.
 async function verifyRepoContribution(repo, username) {
   const isOwner = repo.owner?.login?.toLowerCase() === username.toLowerCase();
   const isFork = Boolean(repo.fork && repo.parent);
@@ -156,6 +148,74 @@ async function verifyRepoContribution(repo, username) {
     confidence: contribution.confidence,
     note: contribution.note,
     evidence: contribution.evidence
+  };
+}
+
+// --- GitHub-wide commit search fallback: finds repos the candidate committed to
+// that aren't in their own account and weren't linked on the resume (e.g. a
+// teammate's repo on a hackathon project). Used only when the normal
+// owned-repos match fails, and only once per resume (cached), since GitHub's
+// search API has a much stricter rate limit than normal API calls. ---
+
+async function searchCommitsByAuthor(username) {
+  try {
+    const { data } = await github.get('/search/commits', {
+      params: { q: `author:${username}`, per_page: 100 }
+    });
+    return data.items || [];
+  } catch (error) {
+    // Search has a much stricter rate limit (30/min) — fail gracefully rather
+    // than breaking verification for the rest of the resume.
+    console.error('Commit search fallback unavailable:', getErrorMessage(error));
+    return null; // null = search failed/unavailable, [] = search worked but found nothing
+  }
+}
+
+function buildReposFromCommitSearch(items) {
+  const repoMap = new Map();
+  for (const item of items) {
+    const repo = item.repository;
+    if (!repo) continue;
+    const key = repo.full_name;
+    if (!repoMap.has(key)) {
+      repoMap.set(key, {
+        name: repo.name,
+        full_name: repo.full_name,
+        description: repo.description || '',
+        homepage: '',
+        owner: repo.owner,
+        fork: repo.fork,
+        _commitCount: 0
+      });
+    }
+    repoMap.get(key)._commitCount += 1;
+  }
+  return [...repoMap.values()];
+}
+
+async function tryCommitSearchFallback(project, getCommitSearchRepos) {
+  const items = await getCommitSearchRepos();
+  if (!items || items.length === 0) return null;
+
+  const candidateRepos = buildReposFromCommitSearch(items);
+  const best = findBestRepoMatch(project, candidateRepos);
+  if (!best) return null;
+
+  const matchedRepo = best.repo;
+  // Search already filters strictly by author=username, so authorship here is
+  // already proven — no need for a separate commit-count check like the
+  // owned-repos path requires.
+  return {
+    projectTitle: project.title,
+    repositoryFound: true,
+    discoveryMethod: 'commit_search_fallback',
+    repository: matchedRepo.full_name,
+    matchConfidence: best.confidence,
+    matchReasons: best.reasons,
+    status: 'pass',
+    confidence: 'high',
+    note: `Candidate authored ${matchedRepo._commitCount} commit(s) in this repository. It is not owned by the candidate and was not linked on the resume, but was discovered via a GitHub-wide commit search and real authorship was confirmed directly.`,
+    evidence: { commitCount: matchedRepo._commitCount }
   };
 }
 
@@ -247,7 +307,7 @@ function findBestRepoMatch(project, repos) {
   return { repo: best.repo, confidence: best.score / 100, reasons: best.reasons };
 }
 
-async function verifyProject(project, username, repos) {
+async function verifyProject(project, username, repos, getCommitSearchRepos) {
   if (project.githubUrl) {
     const match = project.githubUrl.match(/github\.com\/([^/]+)\/([^/?#]+)/i);
     if (match) {
@@ -263,20 +323,24 @@ async function verifyProject(project, username, repos) {
 
   const best = findBestRepoMatch(project, repos);
   if (!best) {
+    // Not found among the candidate's own repos — try the commit-search
+    // fallback before giving up (catches real contributions to repos the
+    // candidate doesn't own and didn't link, e.g. a teammate's repo).
+    const fallbackResult = await tryCommitSearchFallback(project, getCommitSearchRepos);
+    if (fallbackResult) return fallbackResult;
+
     return {
       projectTitle: project.title,
       repositoryFound: false,
       status: 'not_verified',
-      reason: "No GitHub repository was linked on the resume, and no close match was found among this profile's public repositories. This does not prove the project does not exist — only that it could not be automatically located."
+      reason: "No GitHub repository was linked on the resume, and no close match was found among this profile's public repositories or their public commit history. This does not prove the project does not exist — only that it could not be automatically located."
     };
   }
 
   const contribution = await verifyRepoContribution(best.repo, username);
 
-  // Auto-matched (not explicitly linked by the candidate) + below-high confidence
-  // should never auto-"pass" — a weak guess shouldn't carry the same weight as
-  // a repo the candidate directly claimed.
-  const cappedStatus = best.confidence < 0.7 && contribution.status === 'pass'
+  const hasDirectCommitEvidence = contribution.evidence?.commitCount > 0;
+  const cappedStatus = best.confidence < 0.7 && contribution.status === 'pass' && !hasDirectCommitEvidence
     ? 'uncertain'
     : contribution.status;
 
@@ -289,7 +353,7 @@ async function verifyProject(project, username, repos) {
     matchReasons: best.reasons,
     ...contribution,
     status: cappedStatus,
-    note: best.confidence < 0.7
+    note: best.confidence < 0.7 && !hasDirectCommitEvidence
       ? `${contribution.note} (Note: this repository was auto-matched by title similarity, not explicitly linked on the resume — match confidence ${Math.round(best.confidence * 100)}%, treated as unverified rather than confirmed.)`
       : contribution.note
   };
@@ -319,18 +383,24 @@ export async function verifyGithub(structuredData) {
     const languages = [...languageSet];
 
     const normalizedSkills = skills.map(s => s.toLowerCase());
-    // Only compare skills that are actual programming/markup languages — GitHub's
-    // language stats can never detect tools, concepts, or databases (Git, REST APIs,
-    // OOP, MySQL, etc.), so including them in the denominator unfairly drags the
-    // ratio down for skills that were never measurable this way to begin with.
     const languageSkills = normalizedSkills.filter(s => KNOWN_LANGUAGES.has(s));
     const matchedSkills = languageSkills.filter(s => languages.some(l => l === s || l.includes(s) || s.includes(l)));
     const skillMatchRatio = languageSkills.length > 0 ? matchedSkills.length / languageSkills.length : null;
 
+    // Cached, lazy fetch — only called if at least one project actually needs
+    // the fallback, and only once per resume even if several projects need it.
+    let commitSearchCache = null;
+    const getCommitSearchRepos = async () => {
+      if (commitSearchCache === null) {
+        commitSearchCache = await searchCommitsByAuthor(username);
+      }
+      return commitSearchCache;
+    };
+
     const projectChecks = [];
     for (const project of structuredData.projects || []) {
       try {
-        projectChecks.push(await verifyProject(project, username, repos));
+        projectChecks.push(await verifyProject(project, username, repos, getCommitSearchRepos));
       } catch (error) {
         projectChecks.push({ projectTitle: project.title, status: 'uncertain', reason: getErrorMessage(error) });
       }

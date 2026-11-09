@@ -98,28 +98,16 @@ export function calculateScore(verification) {
   if (verification.github) {
     const gh = verification.github;
 
-    if (gh.status === 'pass') {
-      breakdown.push({
-        check: 'GitHub profile exists',
-        status: 'pass',
-        weight: 6,
-        note: `${gh.profile?.publicRepos ?? 'Unknown'} public repositories`
-      });
-    } else if (gh.status === 'fail') {
-      breakdown.push({
-        check: 'GitHub profile exists',
-        status: 'fail',
-        weight: 6,
-        note: gh.reason || 'GitHub profile could not be verified'
-      });
-    } else {
-      breakdown.push({
-        check: 'GitHub profile exists',
-        status: 'uncertain',
-        weight: 6,
-        note: gh.reason || 'GitHub verification inconclusive'
-      });
-    }
+if (verification.github) {
+  const gh = verification.github;
+  if (gh.profile) {
+    breakdown.push({ check: 'GitHub profile exists', status: 'pass', weight: 6, note: `${gh.profile.publicRepos ?? 'Unknown'} public repositories` });
+  } else if (gh.status === 'fail') {
+    breakdown.push({ check: 'GitHub profile exists', status: 'fail', weight: 6, note: gh.reason || 'GitHub profile could not be verified' });
+  } else {
+    breakdown.push({ check: 'GitHub profile exists', status: 'uncertain', weight: 6, note: gh.reason || 'GitHub username missing or could not be checked' });
+  }
+}
 
     // Project repository verification
     if (Array.isArray(gh.projectChecks) && gh.projectChecks.length > 0) {

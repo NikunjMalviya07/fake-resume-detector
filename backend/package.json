@@ -9,7 +9,8 @@
     "seed": "node data/seedInstitutions.js",
     "seed:students": "node data/seedStudents.js",
     "seed:companies": "node data/seedCompanies.js",
-    "test:github": "node scripts/testGithub.js"
+    "test:github": "node scripts/testGithub.js",
+    "list:all-commits": "node scripts/listAllCommits.js"
   },
   "keywords": [],
   "author": "",
